@@ -1,0 +1,6 @@
+# See https://docs.openshift.com/dedicated/using_images/s2i_images/dot_net_core.html
+DOTNET_STARTUP_PROJECT=Huntwords.PuzzleBoard.Cache/Huntwords.PuzzleBoard.Cache.csproj
+DOTNET_TEST_PROJECTS=Huntwords.PuzzleBoard.Cache.Tests/Huntwords.PuzzleBoard.Cache.Tests.csproj
+DOTNET_PUBLISH=true
+DOTNET_CONFIGURATION=Debug
+ASPNETCORE_URLS=http://*:8080
