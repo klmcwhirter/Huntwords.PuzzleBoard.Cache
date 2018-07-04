@@ -7,23 +7,27 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Huntwords.Common.Models;
 using Huntwords.Common.Repositories;
+using Huntwords.Common.Services;
 
 namespace Huntwords.PuzzleBoard.Cache.Services
 {
     public class PuzzleBoardCache
     {
         protected IPuzzleBoardRepository PuzzleBoardRepository { get; }
+        public IRedisPuzzleBoardPubSubService PubSubService { get; }
         protected ILogger<PuzzleBoardCache> Logger { get; }
         protected PuzzleBoardGeneratorOptions Options { get; }
 
         public PuzzleBoardCache(
             IOptions<PuzzleBoardGeneratorOptions> options,
             IPuzzleBoardRepository puzzleBoardRepository,
+            IRedisPuzzleBoardPubSubService pubSubService,
             ILogger<PuzzleBoardCache> logger
         )
         {
             Options = options.Value;
             PuzzleBoardRepository = puzzleBoardRepository;
+            PubSubService = pubSubService;
             Logger = logger;
         }
 
@@ -56,7 +60,7 @@ namespace Huntwords.PuzzleBoard.Cache.Services
 
         public void SubscribePopped(Action<string> poppedHandler)
         {
-            PuzzleBoardRepository.SubscribePopped(poppedHandler);
+            PubSubService.SubscribePopped(poppedHandler);
         }
     }
 }

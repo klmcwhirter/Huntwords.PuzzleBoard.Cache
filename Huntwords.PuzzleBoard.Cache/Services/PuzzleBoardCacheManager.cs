@@ -128,8 +128,6 @@ namespace Huntwords.PuzzleBoard.Cache.Services
 
             FillQueues(verbose);
 
-            Cache.SubscribePopped((n) => FillQueueByName(n, false));
-
             Logger.LogInformation($"FillQueuesPriority({name}, {verbose}) exiting");
         }
 
