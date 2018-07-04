@@ -120,7 +120,7 @@ namespace Huntwords.PuzzleBoard.Cache.Services
         /// <returns></returns>
         public void FillQueueByName(string name, bool verbose)
         {
-            Logger.LogInformation($"FillQueuesPriority({name}, {verbose}) starting");
+            Logger.LogInformation($"Received message for(name={name}, verbose={verbose}) starting");
 
             var puzzle = PuzzleRepository.Get(name);
 
