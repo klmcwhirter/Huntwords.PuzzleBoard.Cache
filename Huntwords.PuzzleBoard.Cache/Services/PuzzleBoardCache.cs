@@ -12,13 +12,13 @@ namespace Huntwords.PuzzleBoard.Cache.Services
 {
     public class PuzzleBoardCache
     {
-        protected IPuzzleBoardRepository PuzzleBoardRepository { get; }
+        protected Func<IPuzzleBoardRepository> PuzzleBoardRepository { get; }
         protected ILogger<PuzzleBoardCache> Logger { get; }
         protected PuzzleBoardGeneratorOptions Options { get; }
 
         public PuzzleBoardCache(
             IOptions<PuzzleBoardGeneratorOptions> options,
-            IPuzzleBoardRepository puzzleBoardRepository,
+            Func<IPuzzleBoardRepository> puzzleBoardRepository,
             ILogger<PuzzleBoardCache> logger
         )
         {
@@ -29,7 +29,7 @@ namespace Huntwords.PuzzleBoard.Cache.Services
 
         public bool CacheFull(string name)
         {
-            var rc = PuzzleBoardRepository.Length(name) >= Options.CacheSize;
+            var rc = PuzzleBoardRepository().Length(name) >= Options.CacheSize;
             return rc;
         }
 
@@ -37,18 +37,18 @@ namespace Huntwords.PuzzleBoard.Cache.Services
         {
             var name = board.Puzzle.Name;
 
-            if (PuzzleBoardRepository.Length(name) < Options.CacheSize)
+            if (PuzzleBoardRepository().Length(name) < Options.CacheSize)
             {
-                PuzzleBoardRepository.Push(board);
+                PuzzleBoardRepository().Push(board);
             }
         }
 
         public Huntwords.Common.Models.PuzzleBoard Dequeue(string name)
         {
             Huntwords.Common.Models.PuzzleBoard rc = null;
-            if (PuzzleBoardRepository.Length(name) > 0)
+            if (PuzzleBoardRepository().Length(name) > 0)
             {
-                rc = PuzzleBoardRepository.Pop(name);
+                rc = PuzzleBoardRepository().Pop(name);
             }
 
             return rc;
@@ -56,7 +56,7 @@ namespace Huntwords.PuzzleBoard.Cache.Services
 
         public void SubscribePopped(Action<string> poppedHandler)
         {
-            PuzzleBoardRepository.SubscribePopped(poppedHandler);
+            PuzzleBoardRepository().SubscribePopped(poppedHandler);
         }
     }
 }

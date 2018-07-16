@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Schedulers;
 using Autofac;
@@ -54,21 +55,32 @@ namespace Huntwords.PuzzleBoard.Cache
             // Start worker threads filling the cache
             Task.Factory.StartNew(() =>
             {
-                try
+                var first = true;
+                do
                 {
-                    Logger.LogInformation("Starting filler task...");
-                    var svc = Container.Resolve<PuzzleBoardCacheManager>();
-                    Logger.LogInformation($"svc={svc}");
-                    svc?.Initialize(false);
-                }
-                catch(Exception ex)
-                {
-                    Logger.LogError(ex, $"Error starting filler task");
-                }
-                finally
-                {
-                    Logger.LogInformation("Started filler task.");
-                }
+                    var state = first ? "Starting" : "Retrying";
+                    if (!first)
+                    {
+                        Thread.Sleep(5000); // wait 5 secs before retrying
+                    }
+
+                    try
+                    {
+                        Logger.LogInformation($"{state} filler task...");
+                        var svc = Container.Resolve<PuzzleBoardCacheManager>();
+                        Logger.LogInformation($"svc={svc}");
+                        svc?.Initialize(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError(ex, $"Error starting filler task");
+                    }
+                    finally
+                    {
+                        Logger.LogInformation("Started filler task.");
+                    }
+                    first = false;
+                } while (true);
             }, TaskCreationOptions.LongRunning);
 
             var rc = new AutofacServiceProvider(Container);
@@ -85,8 +97,8 @@ namespace Huntwords.PuzzleBoard.Cache
 
             builder.RegisterType<LimitedConcurrencyLevelTaskScheduler>().As<TaskScheduler>().SingleInstance();
 
-            builder.RegisterType<PuzzleBoardCache>().AsSelf().SingleInstance();
-            builder.RegisterType<PuzzleBoardCacheManager>().AsSelf().SingleInstance();
+            builder.RegisterType<PuzzleBoardCache>().AsSelf();
+            builder.RegisterType<PuzzleBoardCacheManager>().AsSelf();
 
             builder.RegisterType<PuzzleBoardGenerator>().As<IGenerator<Huntwords.Common.Models.PuzzleBoard>>();
 
